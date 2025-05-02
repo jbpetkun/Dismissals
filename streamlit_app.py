@@ -1,7 +1,6 @@
 import streamlit as st
 from streamlit_gsheets import GSheetsConnection
 import pandas as pd
-import markdown as md
 
 # Display Title and Description
 st.set_page_config(page_title="Sample of Dismissal Entries", layout="wide")
