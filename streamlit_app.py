@@ -1,6 +1,7 @@
 import streamlit as st
 from streamlit_gsheets import GSheetsConnection
 import pandas as pd
+import numpy as np
 
 # Display Title and Description
 st.set_page_config(page_title="Sample of Dismissal Entries", layout="wide")
@@ -10,9 +11,10 @@ st.title("Sample of Dismissal Entries")
 conn = st.connection("gsheets", type=GSheetsConnection)
 if "df" not in st.session_state:
     st.session_state.df = conn.read(worksheet="first500_1May2025", usecols=list(range(17)), ttl=60)
+    df = st.session_state.df
 if "current_index" not in st.session_state:
-    st.session_state.current_index = 0
-df = st.session_state.df
+    # Find index of first row in df where dismissal_entry_type is NaN
+    st.session_state.current_index = np.where(df['dismissal_entry_type'].isnull())[0][0]
 df = df.dropna(how="all")
 columns_to_convert = ['entrynumber']
 df[columns_to_convert] = df[columns_to_convert].apply(pd.to_numeric, errors='coerce')
