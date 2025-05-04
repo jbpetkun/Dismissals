@@ -12,6 +12,8 @@ conn = st.connection("gsheets", type=GSheetsConnection)
 if "df" not in st.session_state:
     st.session_state.df = conn.read(worksheet="first500_1May2025", usecols=list(range(17)), ttl=60)
     df = st.session_state.df
+else:
+    df = st.session_state.df
 if "current_index" not in st.session_state:
     # Find index of first row in df where dismissal_entry_type is NaN
     st.session_state.current_index = np.where(df['dismissal_entry_type'].isnull())[0][0]
@@ -70,6 +72,7 @@ if submit_button:
         # Update the original DataFrame with the user's input
         original_index = current_row.name  # Get the index of the current row in the original DataFrame
         st.session_state.df.loc[original_index, 'dismissal_entry_type'] = dismissal_entry_type
+        df.loc[original_index, 'dismissal_entry_type'] = dismissal_entry_type
         st.session_state.df.loc[original_index, 'order_type_voluntary'] = order_type_voluntary
         st.session_state.df.loc[original_index, 'order_type_prejudice'] = order_type_prejudice
         st.session_state.df.loc[original_index, 'order_type_partial'] = order_type_partial
@@ -77,7 +80,7 @@ if submit_button:
         # Update Google Sheets
         conn.update(worksheet="first500_1May2025", data=st.session_state.df)
         # Move to the next relevant docket entry
-        st.session_state.current_index += 1
+        st.session_state.current_index = np.where(df['dismissal_entry_type'].isnull())[0][0] if df['dismissal_entry_type'].isnull().any() else None
 
         # Reset buttons and rerun the app to display the next entry
         del st.session_state.dismissal_type_selection
